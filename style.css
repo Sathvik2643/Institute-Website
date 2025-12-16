@@ -1,4 +1,3 @@
-/* BASIC RESET */
 * {
   margin: 0;
   padding: 0;
@@ -8,7 +7,6 @@
 body {
   font-family: Arial, sans-serif;
   background: #f4f6fb;
-  color: #222;
 }
 
 .container {
@@ -17,7 +15,6 @@ body {
   padding: 15px;
 }
 
-/* NAVBAR */
 .site-header {
   background: #0b2547;
   color: white;
@@ -25,36 +22,22 @@ body {
 
 .navbar {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-}
-
-.brand {
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.nav-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 22px;
+  align-items: center;
 }
 
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 20px;
+  gap: 15px;
 }
 
-.nav-links li a {
+.nav-links a {
   color: white;
-  text-decoration: none;
   cursor: pointer;
+  text-decoration: none;
 }
 
-/* SECTIONS */
 .section {
   padding: 40px 0;
 }
@@ -63,59 +46,46 @@ body {
   display: none;
 }
 
-/* BUTTON */
 .btn {
   background: #0b5cff;
   color: white;
-  padding: 8px 16px;
-  border-radius: 5px;
-  text-decoration: none;
+  padding: 8px 14px;
   border: none;
+  border-radius: 5px;
   cursor: pointer;
-  display: inline-block;
   margin-top: 10px;
 }
 
-/* STUDENT CORNER */
-.verify-box {
-  margin-top: 20px;
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
   background: white;
-  padding: 15px;
+  padding: 20px;
+  width: 300px;
   border-radius: 8px;
 }
 
-.verify-box input {
-  padding: 8px;
+.modal-box input {
   width: 100%;
-  margin: 8px 0;
+  padding: 8px;
+  margin: 6px 0;
 }
 
-/* FOOTER */
+.close {
+  background: gray;
+}
+
 .site-footer {
   background: #07142a;
   color: white;
   text-align: center;
-  padding: 12px;
-}
-
-/* MOBILE */
-@media (max-width: 768px) {
-  .nav-toggle {
-    display: block;
-  }
-
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    background: #0b2547;
-    position: absolute;
-    right: 0;
-    top: 55px;
-    width: 200px;
-    padding: 10px;
-  }
-
-  .nav-links.show {
-    display: flex;
-  }
+  padding: 10px;
 }
