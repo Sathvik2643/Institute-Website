@@ -8,10 +8,11 @@ import {
   getFirestore,
   doc,
   setDoc,
-  getDoc
+  getDoc,
+  collection,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// 🔥 FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyAdAEDwbkapoWf5FRWywQ3Lc_yee2fLbck",
   authDomain: "project1-27eeb.firebaseapp.com",
@@ -21,60 +22,68 @@ const firebaseConfig = {
   appId: "1:372685998416:web:ed24ead6124ef88c028455"
 };
 
-// INIT
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-//////////////////// REGISTER ////////////////////
+// REGISTER
 window.registerUser = async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = emailInput();
+  const password = passwordInput();
   const role = document.getElementById("role").value;
-
-  if (!email || !password) {
-    alert("Enter email & password");
-    return;
-  }
-
-  if (role === "admin") {
-    alert("Admin accounts are created manually.");
-    return;
-  }
 
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
-
     await setDoc(doc(db, "users", cred.user.uid), {
-      email: email,
-      role: role
+      email,
+      role
     });
-
-    alert(role.toUpperCase() + " registered successfully");
+    alert("Registered as " + role);
   } catch (e) {
     alert(e.message);
   }
 };
 
-//////////////////// LOGIN ////////////////////
+// LOGIN
 window.loginUser = async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
   try {
+    const email = emailInput();
+    const password = passwordInput();
     const cred = await signInWithEmailAndPassword(auth, email, password);
 
     const snap = await getDoc(doc(db, "users", cred.user.uid));
-    const role = snap.exists() ? snap.data().role : "student";
+    const role = snap.data().role;
 
-    alert("Login successful as " + role.toUpperCase());
     closeLogin();
 
     if (role === "student") showSection("student");
     if (role === "employee") showSection("courses");
-    if (role === "admin") showSection("home");
 
+    if (role === "admin") {
+      document.getElementById("admin").style.display = "block";
+      showSection("admin");
+      loadUsers();
+    }
   } catch (e) {
     alert(e.message);
   }
+};
+
+function emailInput() {
+  return document.getElementById("email").value;
+}
+function passwordInput() {
+  return document.getElementById("password").value;
+}
+
+// ADMIN LOAD USERS
+window.loadUsers = async () => {
+  const table = document.getElementById("userTable");
+  const snapshot = await getDocs(collection(db, "users"));
+
+  snapshot.forEach(d => {
+    const row = table.insertRow(-1);
+    row.insertCell(0).innerText = d.data().email;
+    row.insertCell(1).innerText = d.data().role;
+  });
 };
