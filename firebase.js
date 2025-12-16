@@ -26,26 +26,46 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* REGISTER (ACCOUNT) */
+/* REGISTER (ACCOUNT CREATION) */
 window.registerUser = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   if (!email || !password) {
-    alert("Enter email and password");
+    alert("Please enter email and password");
     return;
   }
 
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  if (password.length < 6) {
+    alert("Password must be at least 6 characters");
+    return;
+  }
 
-  await setDoc(doc(db, "users", cred.user.uid), {
-    email: email,
-    role: "student",
-    courses: []
-  });
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
 
-  alert("Registration successful. You can now login.");
+    await setDoc(doc(db, "users", cred.user.uid), {
+      email: email,
+      role: "student",
+      courses: []
+    });
+
+    alert("Registration successful. Please login.");
+
+  } catch (error) {
+    // 🔥 FRIENDLY REGISTER ERRORS
+    if (error.code === "auth/email-already-in-use") {
+      alert("This email is already registered. Please login.");
+    } else if (error.code === "auth/invalid-email") {
+      alert("Invalid email format.");
+    } else if (error.code === "auth/weak-password") {
+      alert("Password is too weak. Use at least 6 characters.");
+    } else {
+      alert("Registration failed: " + error.message);
+    }
+  }
 };
+
 
 /* LOGIN */
 window.loginUser = async () => {
@@ -74,18 +94,21 @@ window.loginUser = async () => {
     window.location.href = "./student.html";
 
   } catch (error) {
-    // 🔥 FRIENDLY ERROR MESSAGES
+    // 🔥 FRIENDLY LOGIN ERRORS
     if (error.code === "auth/user-not-found") {
       alert("User not registered. Please click Register.");
     } else if (error.code === "auth/wrong-password") {
       alert("Incorrect password. Please try again.");
     } else if (error.code === "auth/invalid-email") {
       alert("Invalid email format.");
+    } else if (error.code === "auth/too-many-requests") {
+      alert("Too many attempts. Please try again later.");
     } else {
       alert("Login failed: " + error.message);
     }
   }
 };
+
 
 
 /* STUDENT DASHBOARD LOAD */
