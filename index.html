@@ -1,86 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <title>Code Connect</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<!-- NAVBAR -->
-<header class="site-header">
-  <nav class="navbar container">
-    <div class="brand">Code Connect</div>
-    <ul class="nav-links">
-      <li><a onclick="showSection('home')">Home</a></li>
-      <li><a onclick="showSection('courses')">Courses</a></li>
-      <li><a onclick="showSection('student')">Student Corner</a></li>
-      <li><a onclick="showSection('about')">About</a></li>
-      <li><a onclick="openLogin()">Login</a></li>
-    </ul>
-  </nav>
+<header class="navbar">
+  <div class="brand">Code Connect</div>
+  <ul class="nav-links">
+    <li><a onclick="showSection('home')">Home</a></li>
+    <li><a onclick="showSection('courses')">Courses</a></li>
+    <li><a onclick="openStudent()">Student Corner</a></li>
+    <li><a onclick="showSection('verify')">Verify Certificate</a></li>
+    <li><a onclick="openLogin()">Login</a></li>
+  </ul>
 </header>
 
 <main class="container">
 
-<!-- HOME -->
 <section id="home" class="section">
   <h1>Welcome to Code Connect</h1>
-  <p>Expert mentors. Structured curriculum. Real results.</p>
 </section>
 
-<!-- COURSES -->
 <section id="courses" class="section">
   <h2>Courses Offered</h2>
-
-  <div class="course-card">
-    <h3>Software</h3>
-    <p>C, Python, Java, SQL, Data Analyst, MS Office</p>
-  </div>
-
-  <div class="course-card">
-    <h3>VLSI</h3>
-    <p>Verilog, SystemVerilog, UVM, Design & Verification</p>
-  </div>
-
-  <div class="course-card">
-    <h3>Embedded Systems</h3>
-    <p>Microcontrollers, RTOS, Interfacing, Projects</p>
-  </div>
+  <ul>
+    <li>Software</li>
+    <li>VLSI</li>
+    <li>Embedded Systems</li>
+  </ul>
 </section>
 
-<!-- STUDENT CORNER -->
+<!-- PUBLIC VERIFY -->
+<section id="verify" class="section">
+  <h2>Verify / Download Certificate</h2>
+  <input id="certInput" placeholder="Enter Certificate ID">
+  <button class="btn" onclick="verifyCert()">Verify</button>
+  <p id="certResult"></p>
+  <div id="certDownload"></div>
+</section>
+
+<!-- STUDENT DASHBOARD -->
 <section id="student" class="section">
-  <h2>Student Corner</h2>
+  <h2>Student Dashboard</h2>
 
-  <a class="btn" href="GOOGLE_FORM_URL" target="_blank">Register</a>
+  <p><strong>User:</strong> <span id="studentEmail"></span></p>
 
-  <div class="verify-box">
-    <h3>Verify / Download Certificate</h3>
-    <input id="certInput" placeholder="Enter Certificate ID">
-    <button class="btn" onclick="verifyCert()">Verify</button>
-    <p id="certResult"></p>
-    <div id="certDownload"></div>
-  </div>
-</section>
+  <h3>Registered Courses</h3>
+  <ul id="courseList"></ul>
 
-<!-- ABOUT -->
-<section id="about" class="section">
-  <h2>About Us</h2>
-  <p>Professional coaching institute focused on industry-ready skills.</p>
-</section>
-
-<!-- ADMIN DASHBOARD -->
-<section id="admin" class="section">
-  <h2>Admin Dashboard</h2>
-  <table border="1" width="100%" id="userTable">
-    <tr>
-      <th>Email</th>
-      <th>Role</th>
-    </tr>
-  </table>
+  <a class="btn" href="GOOGLE_FORM_URL" target="_blank">Register New Course</a>
+  <button class="btn logout" onclick="logoutUser()">Logout</button>
 </section>
 
 </main>
@@ -88,30 +61,15 @@
 <!-- LOGIN MODAL -->
 <div id="loginModal" class="modal">
   <div class="modal-box">
-    <h3>Login / Register</h3>
-
-    <select id="role">
-      <option value="student">Student</option>
-      <option value="employee">Employee</option>
-    </select>
-
-    <input id="email" type="email" placeholder="Email">
+    <h3>Student Login</h3>
+    <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
-
-    <div class="modal-actions">
-      <button class="btn" onclick="loginUser()">Login</button>
-      <button class="btn" onclick="registerUser()">Register</button>
-      <button class="btn close" onclick="closeLogin()">Close</button>
-    </div>
+    <button class="btn" onclick="loginUser()">Login</button>
+    <button class="btn close" onclick="closeLogin()">Close</button>
   </div>
 </div>
 
-<footer class="site-footer">
-  <p>© 2025 Code Connect</p>
-</footer>
-
 <script src="main.js"></script>
 <script type="module" src="firebase.js"></script>
-
 </body>
 </html>
