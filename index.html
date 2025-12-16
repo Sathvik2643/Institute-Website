@@ -1,143 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   <title>Code Connect</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
-  <meta name="description" content="Code Connect - Software, VLSI & Embedded Systems Training" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- NAV -->
 <header class="site-header">
   <nav class="navbar container">
     <div class="brand">Code Connect</div>
-    <button class="nav-toggle">☰</button>
     <ul class="nav-links">
       <li><a onclick="showSection('home')">Home</a></li>
-      <li><a onclick="showSection('updates')">Updates</a></li>
       <li><a onclick="showSection('courses')">Courses</a></li>
       <li><a onclick="showSection('student')">Student Corner</a></li>
       <li><a onclick="showSection('about')">About</a></li>
+      <li><a onclick="openLogin()">Login</a></li>
     </ul>
   </nav>
 </header>
 
-<main>
+<main class="container">
 
-<!-- HOME -->
 <section id="home" class="section">
-  <div class="container">
-    <h1>Welcome to Code Connect</h1>
-    <p>Industry-focused training in Software, VLSI and Embedded Systems.</p>
-  </div>
+  <h1>Welcome to Code Connect</h1>
+  <p>Industry-focused training in Software, VLSI and Embedded Systems.</p>
 </section>
 
-<!-- UPDATES -->
-<section id="updates" class="section hidden">
-  <div class="container">
-    <h2>Updates</h2>
-    <p>New batches starting soon. Contact us for details.</p>
-  </div>
-</section>
-
-<!-- COURSES -->
 <section id="courses" class="section hidden">
-  <div class="container">
-    <h2>Courses Offered</h2>
-    <ul>
-      <li><strong>Software:</strong> C, Python, Java, SQL, Data Analyst, MS Office</li>
-      <li><strong>VLSI:</strong> Verilog, SystemVerilog, UVM, Design & Verification</li>
-      <li><strong>Embedded Systems:</strong> Microcontrollers, RTOS, Interfacing</li>
-    </ul>
-  </div>
+  <h2>Courses</h2>
+  <p>Software, VLSI, Embedded Systems</p>
 </section>
 
-<!-- STUDENT CORNER -->
 <section id="student" class="section hidden">
-  <div class="container">
-    <h2>Student Corner</h2>
-
-    <!-- Replace with your Google Form link -->
-    <a class="btn" href="GOOGLE_FORM_URL" target="_blank">Register</a>
-
-    <div class="verify-box">
-      <h3>Verify / Download Certificate</h3>
-      <input id="certInput" type="text" placeholder="Enter Certificate ID">
-      <button class="btn" onclick="verifyCert()">Verify</button>
-      <p id="certResult"></p>
-      <div id="certDownload"></div>
-    </div>
-  </div>
+  <h2>Student Corner</h2>
+  <p>Verify and download certificates.</p>
 </section>
 
-<!-- ABOUT -->
 <section id="about" class="section hidden">
-  <div class="container">
-    <h2>About Us</h2>
-    <p>
-      Code Connect is a training institute focused on practical skills and real-world industry exposure.
-      We help students build strong technical careers.
-    </p>
-  </div>
+  <h2>About Us</h2>
+  <p>Professional training institute.</p>
 </section>
 
 </main>
 
-<!-- FOOTER -->
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Login / Register</h3>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button class="btn" onclick="loginUser()">Login</button>
+    <button class="btn" onclick="registerUser()">Register</button>
+    <button class="btn close" onclick="closeLogin()">Close</button>
+  </div>
+</div>
+
 <footer class="site-footer">
   <p>© 2025 Code Connect</p>
 </footer>
 
 <script>
-/* ---------- SECTION SWITCH (SPA) ---------- */
 function showSection(id) {
-  document.querySelectorAll(".section").forEach(sec => sec.classList.add("hidden"));
+  document.querySelectorAll(".section").forEach(s => s.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
 }
 
-/* ---------- CERTIFICATE VERIFY ---------- */
-let certificates = [];
-
-fetch("certificates.json")
-  .then(r => r.json())
-  .then(data => certificates = data)
-  .catch(() => console.warn("certificates.json not found"));
-
-function verifyCert() {
-  const id = document.getElementById("certInput").value.trim().toUpperCase();
-  const result = document.getElementById("certResult");
-  const download = document.getElementById("certDownload");
-  download.innerHTML = "";
-
-  if (!id) {
-    result.textContent = "Please enter Certificate ID";
-    result.style.color = "red";
-    return;
-  }
-
-  const found = certificates.find(c => c.id === id);
-
-  if (found) {
-    result.textContent = "✔ VALID Certificate - " + (found.name || "");
-    result.style.color = "green";
-
-    if (found.file) {
-      const a = document.createElement("a");
-      a.href = found.file;
-      a.textContent = "Download Certificate";
-      a.className = "btn";
-      a.target = "_blank";
-      download.appendChild(a);
-    }
-  } else {
-    result.textContent = "✖ INVALID Certificate";
-    result.style.color = "red";
-  }
+function openLogin() {
+  document.getElementById("loginModal").classList.remove("hidden");
+}
+function closeLogin() {
+  document.getElementById("loginModal").classList.add("hidden");
 }
 </script>
+
+<!-- 🔥 FIREBASE -->
+<script type="module" src="firebase.js"></script>
 
 </body>
 </html>
