@@ -2,12 +2,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
   getAuth,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore,
   doc,
+  setDoc,
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -24,7 +26,28 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// LOGIN
+/* REGISTER (ACCOUNT) */
+window.registerUser = async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    alert("Enter email and password");
+    return;
+  }
+
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+  await setDoc(doc(db, "users", cred.user.uid), {
+    email: email,
+    role: "student",
+    courses: []
+  });
+
+  alert("Registration successful. You can now login.");
+};
+
+/* LOGIN */
 window.loginUser = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -40,7 +63,7 @@ window.loginUser = async () => {
   window.location.href = "student.html";
 };
 
-// STUDENT DASHBOARD LOAD
+/* STUDENT DASHBOARD LOAD */
 onAuthStateChanged(auth, async user => {
   if (user && document.getElementById("studentEmail")) {
     const snap = await getDoc(doc(db, "users", user.uid));
@@ -57,7 +80,7 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-// LOGOUT
+/* LOGOUT */
 window.logoutUser = async () => {
   await signOut(auth);
   window.location.href = "index.html";
