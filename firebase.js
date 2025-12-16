@@ -52,16 +52,41 @@ window.loginUser = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const cred = await signInWithEmailAndPassword(auth, email, password);
-  const snap = await getDoc(doc(db, "users", cred.user.uid));
-
-  if (snap.data().role !== "student") {
-    alert("Only students are allowed");
+  if (!email || !password) {
+    alert("Please enter email and password");
     return;
   }
 
-  window.location.href = "student.html";
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const snap = await getDoc(doc(db, "users", cred.user.uid));
+
+    if (!snap.exists()) {
+      alert("User record not found. Please register.");
+      return;
+    }
+
+    if (snap.data().role !== "student") {
+      alert("Only students are allowed to login here.");
+      return;
+    }
+
+    window.location.href = "./student.html";
+
+  } catch (error) {
+    // 🔥 FRIENDLY ERROR MESSAGES
+    if (error.code === "auth/user-not-found") {
+      alert("User not registered. Please click Register.");
+    } else if (error.code === "auth/wrong-password") {
+      alert("Incorrect password. Please try again.");
+    } else if (error.code === "auth/invalid-email") {
+      alert("Invalid email format.");
+    } else {
+      alert("Login failed: " + error.message);
+    }
+  }
 };
+
 
 /* STUDENT DASHBOARD LOAD */
 onAuthStateChanged(auth, async user => {
