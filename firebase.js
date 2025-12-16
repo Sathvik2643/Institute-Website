@@ -3,6 +3,8 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -26,18 +28,32 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* REGISTER (ACCOUNT CREATION) */
+/* HELPERS */
+function emailInput() {
+  return document.getElementById("email").value;
+}
+function passwordInput() {
+  return document.getElementById("password").value;
+}
+function errorBox() {
+  return document.getElementById("errorMsg");
+}
+
+/* REGISTER */
 window.registerUser = async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = emailInput();
+  const password = passwordInput();
+  const err = errorBox();
+  err.style.color = "red";
+  err.textContent = "";
 
   if (!email || !password) {
-    alert("Please enter email and password");
+    err.textContent = "Please enter email and password";
     return;
   }
 
   if (password.length < 6) {
-    alert("Password must be at least 6 characters");
+    err.textContent = "Password must be at least 6 characters";
     return;
   }
 
@@ -45,71 +61,94 @@ window.registerUser = async () => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
 
     await setDoc(doc(db, "users", cred.user.uid), {
-      email: email,
+      email,
       role: "student",
       courses: []
     });
 
-    alert("Registration successful. Please login.");
+    await sendEmailVerification(cred.user);
 
-  } catch (error) {
-    // 🔥 FRIENDLY REGISTER ERRORS
-    if (error.code === "auth/email-already-in-use") {
-      alert("This email is already registered. Please login.");
-    } else if (error.code === "auth/invalid-email") {
-      alert("Invalid email format.");
-    } else if (error.code === "auth/weak-password") {
-      alert("Password is too weak. Use at least 6 characters.");
+    err.style.color = "green";
+    err.textContent =
+      "Registration successful. Verification email sent. Please verify before login.";
+
+  } catch (e) {
+    if (e.code === "auth/email-already-in-use") {
+      err.textContent = "Email already registered. Please login.";
+    } else if (e.code === "auth/invalid-email") {
+      err.textContent = "Invalid email format.";
     } else {
-      alert("Registration failed: " + error.message);
+      err.textContent = e.message;
     }
   }
 };
 
-
 /* LOGIN */
 window.loginUser = async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = emailInput();
+  const password = passwordInput();
+  const err = errorBox();
+  err.style.color = "red";
+  err.textContent = "";
 
   if (!email || !password) {
-    alert("Please enter email and password");
+    err.textContent = "Please enter email and password";
     return;
   }
 
   try {
     const cred = await signInWithEmailAndPassword(auth, email, password);
-    const snap = await getDoc(doc(db, "users", cred.user.uid));
 
-    if (!snap.exists()) {
-      alert("User record not found. Please register.");
+    if (!cred.user.emailVerified) {
+      err.textContent = "Email not verified. Please check your inbox.";
       return;
     }
 
-    if (snap.data().role !== "student") {
-      alert("Only students are allowed to login here.");
+    const snap = await getDoc(doc(db, "users", cred.user.uid));
+
+    if (!snap.exists() || snap.data().role !== "student") {
+      err.textContent = "Only students are allowed.";
       return;
     }
 
     window.location.href = "./student.html";
 
-  } catch (error) {
-    // 🔥 FRIENDLY LOGIN ERRORS
-    if (error.code === "auth/user-not-found") {
-      alert("User not registered. Please click Register.");
-    } else if (error.code === "auth/wrong-password") {
-      alert("Incorrect password. Please try again.");
-    } else if (error.code === "auth/invalid-email") {
-      alert("Invalid email format.");
-    } else if (error.code === "auth/too-many-requests") {
-      alert("Too many attempts. Please try again later.");
+  } catch (e) {
+    if (e.code === "auth/user-not-found") {
+      err.textContent = "User not registered. Please register.";
+    } else if (e.code === "auth/wrong-password") {
+      err.textContent = "Incorrect password.";
+    } else if (e.code === "auth/invalid-email") {
+      err.textContent = "Invalid email format.";
+    } else if (e.code === "auth/too-many-requests") {
+      err.textContent = "Too many attempts. Try again later.";
     } else {
-      alert("Login failed: " + error.message);
+      err.textContent = e.message;
     }
   }
 };
 
+/* FORGOT PASSWORD */
+window.forgotPassword = async () => {
+  const email = emailInput();
+  const err = errorBox();
+  err.style.color = "green";
+  err.textContent = "";
 
+  if (!email) {
+    err.style.color = "red";
+    err.textContent = "Enter your email to reset password.";
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    err.textContent = "Password reset link sent to your email.";
+  } catch (e) {
+    err.style.color = "red";
+    err.textContent = e.message;
+  }
+};
 
 /* STUDENT DASHBOARD LOAD */
 onAuthStateChanged(auth, async user => {
@@ -131,5 +170,5 @@ onAuthStateChanged(auth, async user => {
 /* LOGOUT */
 window.logoutUser = async () => {
   await signOut(auth);
-  window.location.href = "index.html";
+  window.location.href = "./index.html";
 };
