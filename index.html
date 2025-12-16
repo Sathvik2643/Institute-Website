@@ -28,34 +28,56 @@
 <!-- HOME -->
 <section id="home" class="section">
   <h1>Welcome to Code Connect</h1>
-  <p>Industry-focused training in Software, VLSI and Embedded Systems.</p>
+  <p>Expert mentors. Structured curriculum. Real results.</p>
 </section>
 
 <!-- COURSES -->
 <section id="courses" class="section">
-  <h2>Courses</h2>
-  <p>Software, VLSI, Embedded Systems</p>
+  <h2>Courses Offered</h2>
+
+  <div class="course-card">
+    <h3>Software</h3>
+    <p>C, Python, Java, SQL, Data Analyst, MS Office</p>
+  </div>
+
+  <div class="course-card">
+    <h3>VLSI</h3>
+    <p>Verilog, SystemVerilog, UVM, Design & Verification</p>
+  </div>
+
+  <div class="course-card">
+    <h3>Embedded Systems</h3>
+    <p>Microcontrollers, RTOS, Interfacing, Projects</p>
+  </div>
 </section>
 
 <!-- STUDENT -->
 <section id="student" class="section">
   <h2>Student Corner</h2>
-  <p>Verify and download certificates.</p>
+
+  <a class="btn" href="GOOGLE_FORM_URL" target="_blank">Register</a>
+
+  <div class="verify-box">
+    <h3>Verify / Download Certificate</h3>
+    <input id="certInput" placeholder="Enter Certificate ID">
+    <button class="btn" onclick="verifyCert()">Verify</button>
+    <p id="certResult"></p>
+    <div id="certDownload"></div>
+  </div>
 </section>
 
 <!-- ABOUT -->
 <section id="about" class="section">
   <h2>About Us</h2>
-  <p>Professional training institute.</p>
+  <p>Professional coaching institute focused on industry-ready skills.</p>
 </section>
 
 </main>
 
-<!-- LOGIN MODAL (POPUP) -->
+<!-- LOGIN MODAL -->
 <div id="loginModal" class="modal">
   <div class="modal-box">
     <h3>Login / Register</h3>
-
     <input id="email" type="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
 
@@ -71,29 +93,8 @@
   <p>© 2025 Code Connect</p>
 </footer>
 
-<script>
-/* ---------- SPA SECTION SWITCH ---------- */
-function showSection(id) {
-  document.querySelectorAll(".section").forEach(sec => sec.style.display = "none");
-  document.getElementById(id).style.display = "block";
-}
-
-/* ---------- LOGIN MODAL ---------- */
-function openLogin() {
-  document.getElementById("loginModal").style.display = "flex";
-}
-function closeLogin() {
-  document.getElementById("loginModal").style.display = "none";
-}
-
-/* ---------- INITIAL LOAD ---------- */
-document.addEventListener("DOMContentLoaded", () => {
-  showSection("home");     // show ONLY home
-  closeLogin();            // hide modal
-});
-</script>
-
-<!-- FIREBASE -->
+<!-- JS FILES -->
+<script src="main.js"></script>
 <script type="module" src="firebase.js"></script>
 
 </body>
