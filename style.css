@@ -1,18 +1,29 @@
 body {
   font-family: Arial, sans-serif;
   background: #f4f6fb;
+  margin: 0;
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: auto;
+  padding: 20px;
+}
+
+.site-header {
+  background: #0b2547;
+}
+
+.brand {
+  font-size: 30px;
+  font-weight: bold;
+  color: #00d4ff;
 }
 
 .navbar {
   display: flex;
   justify-content: space-between;
-  background: #0b2547;
-  padding: 10px;
+  align-items: center;
 }
 
 .nav-links {
@@ -24,11 +35,19 @@ body {
 .nav-links a {
   color: white;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .section {
-  padding: 30px;
   display: none;
+  padding: 40px 0;
+}
+
+.course-card {
+  background: white;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
 }
 
 .btn {
@@ -37,28 +56,24 @@ body {
   padding: 8px 14px;
   border: none;
   cursor: pointer;
-  margin-top: 10px;
 }
 
-.logout {
-  background: #d9534f;
-}
-
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: none;
-  align-items: center;
+.login-page {
+  height: 100vh;
+  display: flex;
   justify-content: center;
+  align-items: center;
 }
 
-.modal-box {
+.login-box {
   background: white;
-  padding: 20px;
+  padding: 25px;
   width: 300px;
 }
 
-.close {
-  background: gray;
+.site-footer {
+  background: #07142a;
+  color: white;
+  text-align: center;
+  padding: 10px;
 }
