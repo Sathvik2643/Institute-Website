@@ -15,6 +15,7 @@ body {
   padding: 15px;
 }
 
+/* NAVBAR */
 .site-header {
   background: #0b2547;
   color: white;
@@ -38,14 +39,12 @@ body {
   cursor: pointer;
 }
 
+/* SECTIONS */
 .section {
   padding: 40px 0;
 }
 
-.hidden {
-  display: none;
-}
-
+/* BUTTON */
 .btn {
   background: #0b5cff;
   color: white;
@@ -53,41 +52,44 @@ body {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  margin-top: 10px;
 }
 
-/* MODAL */
+/* MODAL (POPUP) */
 .modal {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.6);
-  display: flex;
+  display: none;              /* 🔥 hidden by default */
   align-items: center;
   justify-content: center;
-}
-
-/* 🔥 FIX */
-.modal.hidden {
-  display: none;
+  z-index: 1000;
 }
 
 .modal-box {
   background: white;
   padding: 20px;
-  width: 300px;
-  border-radius: 8px;
+  width: 320px;
+  border-radius: 10px;
+  text-align: center;
 }
 
 .modal-box input {
   width: 100%;
-  padding: 8px;
-  margin: 6px 0;
+  padding: 10px;
+  margin: 8px 0;
 }
 
-.close {
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.btn.close {
   background: gray;
 }
 
+/* FOOTER */
 .site-footer {
   background: #07142a;
   color: white;
