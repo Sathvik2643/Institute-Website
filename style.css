@@ -155,3 +155,37 @@ body {
   top: 0;
   z-index: 1000;
 }
+
+/* ================================
+   LOGIN PAGE – FORCE HOME BUTTON
+   ================================ */
+
+/* Detect login page by body content */
+.login-page ~ .site-header,
+body:has(.login-page) .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+@media (max-width: 768px) {
+
+  /* Always show navbar on login page */
+  body:has(.login-page) .navbar {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  /* Force nav links visible on login page */
+  body:has(.login-page) .nav-links {
+    display: flex !important;
+    max-height: none !important;
+    opacity: 1 !important;
+    flex-direction: row !important;
+  }
+
+  /* Hide hamburger menu button on login page */
+  body:has(.login-page) .menu-btn {
+    display: none !important;
+  }
+}
