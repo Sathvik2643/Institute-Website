@@ -9,6 +9,11 @@ function showSection(id) {
   document.getElementById(id).style.display = "block";
 }
 
+function toggleMenu() {
+  const menu = document.getElementById("navMenu");
+  menu.classList.toggle("show");
+}
+
 function verifyCert() {
   const id = document.getElementById("certInput").value.trim().toUpperCase();
   const res = document.getElementById("certResult");
