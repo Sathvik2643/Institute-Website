@@ -244,3 +244,45 @@ body {
   padding: 15px;
   font-size: 14px;
 }
+/* =========================
+   ADMIN DASHBOARD
+========================= */
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.stat-card h3 {
+  font-size: 32px;
+  color: #0b5cff;
+  margin: 0;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.admin-table th {
+  background: #f1f5f9;
+  font-weight: 600;
+}
