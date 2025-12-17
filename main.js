@@ -14,6 +14,12 @@ function toggleMenu() {
   menu.classList.toggle("show");
 }
 
+function closeMenu() {
+  const menu = document.getElementById("navMenu");
+  if (menu) menu.classList.remove("show");
+}
+
+
 function verifyCert() {
   const id = document.getElementById("certInput").value.trim().toUpperCase();
   const res = document.getElementById("certResult");
