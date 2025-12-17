@@ -14,10 +14,16 @@ body {
   background: #0b2547;
 }
 
-.brand {
+.brand a {
+  color: #00d4ff;
   font-size: 30px;
   font-weight: bold;
-  color: #00d4ff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.brand a:hover {
+  opacity: 0.85;
 }
 
 .navbar {
