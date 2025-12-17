@@ -13,10 +13,14 @@
     <div class="brand">Code Connect</div>
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
     <ul class="nav-links" id="navMenu">
-      <li><a href="#" onclick="showSection('home')">Home</a></li>
+     <!-- <li><a href="#" onclick="showSection('home')">Home</a></li>
       <li><a href="#" onclick="showSection('courses')">Courses</a></li>
       <li><a href="login.html" onclick="showSection('student')">Student Corner</a></li>
-      <li><a href="#" onclick="showSection('verify')">Certificates</a></li>
+      <li><a href="#" onclick="showSection('verify')">Certificates</a></li> -->
+      <li><a href="#" onclick="showSection('home'); closeMenu()">Home</a></li>
+      <li><a href="#" onclick="showSection('courses'); closeMenu()">Courses</a></li>
+      <li><a href="./login.html" onclick="closeMenu()">Student Corner</a></li>
+      <li><a href="#" onclick="showSection('verify'); closeMenu()">Certificate</a></li>
       <li><a href="#" onclick="showSection('about')">About us</a></li>
     </ul>
   </nav>
