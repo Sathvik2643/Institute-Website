@@ -95,4 +95,40 @@ body {
   background: #6c757d;
 }
 
+/* =========================
+   MOBILE MENU BUTTON
+   ========================= */
+
+.menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: white;
+  cursor: pointer;
+}
+
+/* MOBILE VIEW */
+@media (max-width: 768px) {
+
+  .menu-btn {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    margin-top: 10px;
+  }
+
+  .nav-links.show {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 10px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+}
 
