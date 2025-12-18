@@ -293,14 +293,21 @@ window.assignCourse = async () => {
 
 /* ================= CERTIFICATES (RESTORED) ================= */
 window.addCertificate = async () => {
-  const id = certId.value;
-  const email = certEmail.value;
-  const course = certCourse.value;
-  const link = certLink.value;
+  const id = certId.value.trim();
+  const email = certEmail.value.trim();
+  const course = certCourse.value.trim();
+  let link = certLink.value.trim();
 
   if (!id || !email || !link) {
     alert("Fill all required fields");
     return;
+  }
+
+  /* ===== CONVERT GOOGLE DRIVE LINK TO DOWNLOAD LINK ===== */
+  const match = link.match(/\/d\/([^/]+)/);
+  if (match && match[1]) {
+    const fileId = match[1];
+    link = `https://drive.google.com/uc?export=download&id=${fileId}`;
   }
 
   await setDoc(doc(db, "certificates", id), {
@@ -309,8 +316,9 @@ window.addCertificate = async () => {
     fileUrl: link
   });
 
-  alert("Certificate added");
+  alert("Certificate added (download link saved)");
 };
+
 
 /* ================= STUDENT COURSES ================= */
 async function loadStudentCourses(uid) {
