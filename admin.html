@@ -54,7 +54,6 @@
         <tbody id="userTable"></tbody>
       </table>
     </div>
-  </div>
 
     <!-- COURSE MANAGEMENT -->
     <div class="accordion-item">
@@ -62,7 +61,13 @@
         Course Management
       </button>
       <div class="accordion-content">
-        <p>Course management will be added here.</p>
+        
+        <input id="courseName" placeholder="Course Name">
+        <input id="courseDesc" placeholder="Course Description">
+        
+        <button class="btn" onclick="addCourse()">Add Course</button>
+        <ul id="courseList"></ul>
+      
       </div>
     </div>
 
@@ -71,11 +76,16 @@
       <button class="accordion-btn" onclick="toggleAccordion(2)">
         Certificate Management
       </button>
+      
       <div class="accordion-content">
-        <p>Certificate management will be added here.</p>
+        <input id="certId" placeholder="Certificate ID">
+        <input id="certEmail" placeholder="Student Email">
+        <input id="certCourse" placeholder="Course Name">
+        <input id="certLink" placeholder="Drive File Link">
+        
+        <button class="btn" onclick="addCertificate()">Add Certificate</button>
       </div>
     </div>
-
   </div>
 
 </main>
