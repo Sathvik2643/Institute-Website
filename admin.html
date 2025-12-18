@@ -37,6 +37,31 @@
     </div>
   </div>
 
+  <!-- COURSE MANAGEMENT -->
+<div class="accordion-item">
+  <button class="accordion-btn" onclick="toggleAccordion(0)">
+    Course Management
+  </button>
+
+  <div class="accordion-content">
+
+    <h3>Add Course</h3>
+    <input id="courseName" placeholder="Course Name">
+    <textarea id="courseDesc" placeholder="Course Description"></textarea>
+    <button class="btn" onclick="addCourse()">Add Course</button>
+
+    <h3 style="margin-top:20px;">Available Courses</h3>
+    <ul id="courseList"></ul>
+
+    <h3 style="margin-top:20px;">Assign Course to Student</h3>
+    <select id="studentSelect"></select>
+    <select id="courseSelect"></select>
+    <button class="btn" onclick="assignCourse()">Assign</button>
+
+  </div>
+</div>
+
+
   <!-- ACCORDION TABS -->
   <div class="accordion">
 
