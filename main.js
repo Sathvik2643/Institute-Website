@@ -1,15 +1,17 @@
 /* ================= SECTION NAVIGATION ================= */
-function showSection(id) {
+window.showSection = function (id) {
   document.querySelectorAll(".section").forEach(s => {
     s.style.display = "none";
   });
 
   const el = document.getElementById(id);
   if (el) el.style.display = "block";
-}
+};
 
 document.addEventListener("DOMContentLoaded", () => {
-  showSection("home");
+  if (document.getElementById("home")) {
+    showSection("home");
+  }
 
   if (localStorage.getItem("theme") === "dark") {
     document.body.classList.add("dark");
@@ -17,25 +19,25 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ================= MOBILE MENU ================= */
-function toggleMenu() {
+window.toggleMenu = function () {
   document.getElementById("navMenu")?.classList.toggle("show");
-}
+};
 
-function closeMenu() {
+window.closeMenu = function () {
   document.getElementById("navMenu")?.classList.remove("show");
-}
+};
 
 /* ================= THEME ================= */
-function toggleTheme() {
+window.toggleTheme = function () {
   document.body.classList.toggle("dark");
   localStorage.setItem(
     "theme",
     document.body.classList.contains("dark") ? "dark" : "light"
   );
-}
+};
 
-/* ================= ADMIN ACCORDION (RESTORED) ================= */
-function toggleAccordion(index) {
+/* ================= ADMIN ACCORDION (FIXED) ================= */
+window.toggleAccordion = function (index) {
   const sections = document.querySelectorAll(".accordion-content");
 
   sections.forEach((sec, i) => {
@@ -46,4 +48,4 @@ function toggleAccordion(index) {
       sec.style.display = "none";
     }
   });
-}
+};
