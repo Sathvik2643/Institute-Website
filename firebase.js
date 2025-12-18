@@ -175,7 +175,7 @@ window.forgotPassword = async () => {
 };
 
 /* ================= STUDENT DASHBOARD ================= */
-onAuthStateChanged(auth, async user => {
+/*onAuthStateChanged(auth, async user => {
   if (user && document.getElementById("studentEmail")) {
     const snap = await getDoc(doc(db, "users", user.uid));
     if (!snap.exists()) return;
@@ -191,7 +191,62 @@ onAuthStateChanged(auth, async user => {
       ul.appendChild(li);
     });
   }
+});*/
+onAuthStateChanged(auth, async user => {
+  if (!user || !location.pathname.includes("admin.html")) return;
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (!snap.exists() || snap.data().role !== "admin") {
+    alert("Access denied");
+    location.href = "./login.html";
+    return;
+  }
+
+  const usersSnap = await getDocs(collection(db, "users"));
+  allUsersCache = [];
+
+  let total = 0, students = 0, admins = 0;
+
+  usersSnap.forEach(d => {
+    const data = d.data();
+    allUsersCache.push({ id: d.id, ...data });
+    total++;
+    if (data.role === "student") students++;
+    if (data.role === "admin") admins++;
+  });
+
+  document.getElementById("totalUsers").innerText = total;
+  document.getElementById("totalStudents").innerText = students;
+  document.getElementById("totalAdmins").innerText = admins;
+
+  renderUserTable(allUsersCache);
 });
+
+function renderUserTable(users) {
+  const table = document.getElementById("userTable");
+  table.innerHTML = "";
+
+  users.forEach(u => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${u.email}</td>
+      <td>${u.role}</td>
+      <td>
+        <select onchange="changeUserRole('${u.id}', this.value)">
+          <option value="student" ${u.role === "student" ? "selected" : ""}>Student</option>
+          <option value="admin" ${u.role === "admin" ? "selected" : ""}>Admin</option>
+        </select>
+      </td>
+      <td>
+        <button class="btn danger" onclick="deleteUserFirestore('${u.id}')">
+          Delete
+        </button>
+      </td>
+    `;
+    table.appendChild(tr);
+  });
+}
+
 
 /* ================= LOGOUT ================= */
 window.logoutUser = async () => {
@@ -260,3 +315,33 @@ window.changeUserRole = async (uid, newRole) => {
   document.getElementById("totalStudents").innerText = students;
   document.getElementById("totalAdmins").innerText = admins;
 });
+
+/* ================= ADMIN HELPERS ================= */
+let allUsersCache = [];
+
+window.filterUsers = (role) => {
+  renderUserTable(
+    role ? allUsersCache.filter(u => u.role === role) : allUsersCache
+  );
+};
+
+window.toggleAccordion = (index) => {
+  document.querySelectorAll(".accordion-content").forEach((el, i) => {
+    el.style.display = i === index && el.style.display !== "block"
+      ? "block"
+      : "none";
+  });
+};
+
+window.deleteUserFirestore = async (uid) => {
+  if (!confirm("Are you sure you want to delete this user?")) return;
+  await deleteDoc(doc(db, "users", uid));
+  alert("User deleted");
+  location.reload();
+};
+
+window.changeUserRole = async (uid, role) => {
+  await setDoc(doc(db, "users", uid), { role }, { merge: true });
+  alert("Role updated");
+  location.reload();
+};
