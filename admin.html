@@ -11,7 +11,7 @@
 <header class="site-header">
   <nav class="navbar container">
     <div class="brand">
-      <a href="#">Institute Portal</a>
+      <a href="./index.html">Institute Portal</a>
     </div>
     <ul class="nav-links">
       <li><a href="#" onclick="logoutUser()">Logout</a></li>
@@ -20,41 +20,70 @@
 </header>
 
 <main class="container">
-  <section class="section" style="display:block">
-    <h2>Admin Dashboard</h2>
 
-    <!-- STATS -->
-    <div class="admin-stats">
-      <div class="stat-card">
-        <h3 id="totalUsers">0</h3>
-        <p>Total Users</p>
-      </div>
-      <div class="stat-card">
-        <h3 id="totalStudents">0</h3>
-        <p>Students</p>
-      </div>
-      <div class="stat-card">
-        <h3 id="totalAdmins">0</h3>
-        <p>Admins</p>
+  <!-- STATS -->
+  <div class="admin-stats">
+    <div class="stat-card">
+      <h3 id="totalUsers">0</h3>
+      <p>Total Users</p>
+    </div>
+    <div class="stat-card clickable" onclick="filterUsers('student')">
+      <h3 id="totalStudents">0</h3>
+      <p>Students</p>
+    </div>
+    <div class="stat-card clickable" onclick="filterUsers('admin')">
+      <h3 id="totalAdmins">0</h3>
+      <p>Admins</p>
+    </div>
+  </div>
+
+  <!-- ACCORDION TABS -->
+  <div class="accordion">
+
+    <!-- USER MANAGEMENT -->
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion(0)">
+        User Management
+      </button>
+      <div class="accordion-content">
+
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Change Role</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody id="userTable"></tbody>
+        </table>
+
       </div>
     </div>
 
-    <!-- USER TABLE -->
-    <h3 style="margin-top:30px;">User Management</h3>
+    <!-- COURSE MANAGEMENT -->
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion(1)">
+        Course Management
+      </button>
+      <div class="accordion-content">
+        <p>Course management will be added here.</p>
+      </div>
+    </div>
 
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Change Role</th>
-        </tr>
-      </thead>
-      <tbody id="userTable">
-        <!-- Filled by Firebase -->
-      </tbody>
-    </table>
-  </section>
+    <!-- CERTIFICATE MANAGEMENT -->
+    <div class="accordion-item">
+      <button class="accordion-btn" onclick="toggleAccordion(2)">
+        Certificate Management
+      </button>
+      <div class="accordion-content">
+        <p>Certificate management will be added here.</p>
+      </div>
+    </div>
+
+  </div>
+
 </main>
 
 <footer class="site-footer">
