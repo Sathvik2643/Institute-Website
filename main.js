@@ -49,3 +49,9 @@ window.toggleAccordion = function (index) {
     }
   });
 };
+
+/* ===== TOGGLE COURSES LIST ===== */
+window.toggleCourses = function () {
+  const box = document.getElementById("courseListBox");
+  box.style.display = box.style.display === "block" ? "none" : "block";
+};
