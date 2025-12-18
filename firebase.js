@@ -1,6 +1,5 @@
 /* ================= FIREBASE IMPORTS ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -17,7 +16,8 @@ import {
   getDoc,
   getDocs,
   deleteDoc,
-  collection
+  collection,
+  addDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ================= FIREBASE CONFIG ================= */
@@ -79,14 +79,8 @@ window.registerUser = async () => {
     err.style.color = "green";
     err.textContent =
       "Registration successful. Verification email sent. Please verify before login.";
-  } catch (e) {
-    if (e.code === "auth/email-already-in-use") {
-      err.textContent = "Email already registered. Please login.";
-    } else if (e.code === "auth/invalid-email") {
-      err.textContent = "Invalid email format.";
-    } else {
-      err.textContent = "Registration failed.";
-    }
+  } catch {
+    err.textContent = "Registration failed.";
   }
 };
 
@@ -116,7 +110,7 @@ window.loginUser = async () => {
     const userRef = doc(db, "users", cred.user.uid);
     let snap = await getDoc(userRef);
 
-    // Auto-create Firestore record if missing
+    // Auto-create user record if missing
     if (!snap.exists()) {
       await setDoc(userRef, {
         email: cred.user.email,
@@ -127,24 +121,10 @@ window.loginUser = async () => {
     }
 
     const role = snap.data().role;
+    location.href = role === "admin" ? "./admin.html" : "./student.html";
 
-    if (role === "admin") {
-      location.href = "./admin.html";
-    } else {
-      location.href = "./student.html";
-    }
-  } catch (e) {
-    if (
-      e.code === "auth/invalid-credential" ||
-      e.code === "auth/user-not-found" ||
-      e.code === "auth/wrong-password"
-    ) {
-      err.textContent = "Invalid email or password.";
-    } else if (e.code === "auth/invalid-email") {
-      err.textContent = "Invalid email format.";
-    } else {
-      err.textContent = "Login failed.";
-    }
+  } catch {
+    err.textContent = "Invalid email or password.";
   }
 };
 
@@ -154,20 +134,15 @@ window.forgotPassword = async () => {
   const err = errorBox();
   if (!err) return;
 
-  err.textContent = "";
-  err.style.color = "green";
-
   if (!email) {
-    err.style.color = "red";
-    err.textContent = "Enter your email to reset password.";
+    err.textContent = "Enter email to reset password.";
     return;
   }
 
   try {
     await sendPasswordResetEmail(auth, email);
-    err.textContent = "Password reset link sent to your email.";
+    err.textContent = "Password reset link sent.";
   } catch {
-    err.style.color = "red";
     err.textContent = "Failed to send reset email.";
   }
 };
@@ -210,11 +185,11 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
+  // Load users
   const usersSnap = await getDocs(collection(db, "users"));
   allUsersCache = [];
 
   let total = 0, students = 0, admins = 0;
-
   usersSnap.forEach(d => {
     const data = d.data();
     allUsersCache.push({ id: d.id, ...data });
@@ -226,9 +201,11 @@ onAuthStateChanged(auth, async user => {
   document.getElementById("totalUsers").innerText = total;
   document.getElementById("totalStudents").innerText = students;
   document.getElementById("totalAdmins").innerText = admins;
+
+  loadCourses();
 });
 
-/* ================= ADMIN ACTIONS ================= */
+/* ================= USER LIST FILTER ================= */
 window.filterUsers = (role) => {
   const container = document.getElementById("userListContainer");
 
@@ -262,9 +239,7 @@ function renderUserTable(users) {
         </select>
       </td>
       <td>
-        <button class="btn danger" onclick="deleteUserFirestore('${u.id}')">
-          Delete
-        </button>
+        <button onclick="deleteUserFirestore('${u.id}')">Delete</button>
       </td>
     `;
     table.appendChild(tr);
@@ -278,7 +253,7 @@ window.changeUserRole = async (uid, role) => {
 };
 
 window.deleteUserFirestore = async (uid) => {
-  if (!confirm("Are you sure you want to delete this user?")) return;
+  if (!confirm("Delete this user?")) return;
   await deleteDoc(doc(db, "users", uid));
   alert("User deleted");
   location.reload();
@@ -288,19 +263,25 @@ window.deleteUserFirestore = async (uid) => {
 window.addCourse = async () => {
   const name = document.getElementById("courseName").value;
   const desc = document.getElementById("courseDesc").value;
-  if (!name) return alert("Enter course name");
+
+  if (!name) {
+    alert("Enter course name");
+    return;
+  }
 
   await addDoc(collection(db, "courses"), {
     name,
     description: desc
   });
 
+  document.getElementById("courseName").value = "";
+  document.getElementById("courseDesc").value = "";
+
   alert("Course added");
+  loadCourses();
 };
 
-onAuthStateChanged(auth, async user => {
-  if (!user || !location.pathname.includes("admin.html")) return;
-
+async function loadCourses() {
   const list = document.getElementById("courseList");
   if (!list) return;
 
@@ -312,7 +293,7 @@ onAuthStateChanged(auth, async user => {
     li.textContent = docu.data().name;
     list.appendChild(li);
   });
-});
+}
 
 /* ================= CERTIFICATE MANAGEMENT ================= */
 window.addCertificate = async () => {
