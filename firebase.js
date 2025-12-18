@@ -225,10 +225,36 @@ onAuthStateChanged(auth, async user => {
     if (data.role === "student") students++;
     if (data.role === "admin") admins++;
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${data.email}</td><td>${data.role}</td>`;
+   const tr = document.createElement("tr");
+    tr.innerHTML = `
+    <td>${data.email}</td>
+    <td>${data.role}</td>
+    <td>
+    <select onchange="changeUserRole('${docu.id}', this.value)">
+      <option value="student" ${data.role === "student" ? "selected" : ""}>Student</option>
+      <option value="admin" ${data.role === "admin" ? "selected" : ""}>Admin</option>
+    </select>
+    </td>
+    `;
     table.appendChild(tr);
+
   });
+
+  /* ================= CHANGE USER ROLE (ADMIN) ================= */
+window.changeUserRole = async (uid, newRole) => {
+  try {
+    await setDoc(
+      doc(db, "users", uid),
+      { role: newRole },
+      { merge: true }
+    );
+    alert("Role updated successfully");
+    location.reload();
+  } catch (err) {
+    alert("Failed to update role");
+  }
+};
+
 
   document.getElementById("totalUsers").innerText = total;
   document.getElementById("totalStudents").innerText = students;
