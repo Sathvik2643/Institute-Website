@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  sendPasswordResetEmail,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -12,11 +13,7 @@ import {
   getFirestore,
   doc,
   setDoc,
-  getDoc,
-  getDocs,
-  deleteDoc,
-  collection,
-  addDoc
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ================= CONFIG ================= */
@@ -31,98 +28,94 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* ================= HELPERS ================= */
-const emailInput = () => document.getElementById("email")?.value || "";
-const passwordInput = () => document.getElementById("password")?.value || "";
-const errorBox = () => document.getElementById("errorMsg");
+/* ================= DOM ================= */
+const form = document.getElementById("loginForm");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const errorMsg = document.getElementById("errorMsg");
+const registerBtn = document.getElementById("registerUser");
+const forgotBtn = document.getElementById("forgotPassword");
 
-/* ================= LOGIN (FIXED) ================= */
-window.loginUser = async () => {
-  const email = emailInput();
-  const password = passwordInput();
-  const err = errorBox();
-
-  err.textContent = "";
-
-  if (!email || !password) {
-    err.textContent = "Enter email and password";
-    return;
-  }
+/* ================= LOGIN ================= */
+form?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  errorMsg.textContent = "";
 
   try {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const cred = await signInWithEmailAndPassword(
+      auth,
+      emailInput.value,
+      passwordInput.value
+    );
 
     if (!cred.user.emailVerified) {
-      err.textContent = "Please verify your email first";
+      errorMsg.textContent = "Please verify your email before login.";
       return;
     }
 
     const snap = await getDoc(doc(db, "users", cred.user.uid));
-
     if (!snap.exists()) {
-      err.textContent = "User record not found";
+      errorMsg.textContent = "User record not found.";
       return;
     }
 
     const role = snap.data().role;
+    window.location.href =
+      role === "admin" ? "admin.html" : "student.html";
 
-    if (role === "admin") {
-      window.location.href = "admin.html";
-    } else {
-      window.location.href = "student.html";
-    }
-
-  } catch (e) {
-    err.textContent = "Invalid email or password";
+  } catch {
+    errorMsg.textContent = "Invalid email or password.";
   }
-};
+});
 
 /* ================= REGISTER ================= */
-window.registerUser = async () => {
-  const email = emailInput();
-  const password = passwordInput();
-  const err = errorBox();
+registerBtn?.addEventListener("click", async () => {
+  errorMsg.textContent = "";
 
-  if (password.length < 6) {
-    err.textContent = "Password must be at least 6 characters";
+  if (passwordInput.value.length < 6) {
+    errorMsg.textContent = "Password must be at least 6 characters.";
     return;
   }
 
   try {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const cred = await createUserWithEmailAndPassword(
+      auth,
+      emailInput.value,
+      passwordInput.value
+    );
 
     await setDoc(doc(db, "users", cred.user.uid), {
-      email,
+      email: emailInput.value,
       role: "student",
       courses: []
     });
 
     await sendEmailVerification(cred.user);
-    err.textContent = "Verification email sent";
+    errorMsg.textContent =
+      "Registration successful. Verification email sent.";
 
   } catch {
-    err.textContent = "Registration failed";
+    errorMsg.textContent = "Registration failed.";
   }
-};
+});
 
-/* ================= LOGOUT ================= */
+/* ================= FORGOT PASSWORD ================= */
+forgotBtn?.addEventListener("click", async () => {
+  if (!emailInput.value) {
+    errorMsg.textContent = "Enter your email to reset password.";
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, emailInput.value);
+    errorMsg.textContent = "Password reset email sent.";
+  } catch {
+    errorMsg.textContent = "Failed to send reset email.";
+  }
+});
+
+/* ================= LOGOUT (USED ELSEWHERE) ================= */
 window.logoutUser = async () => {
   await signOut(auth);
   location.href = "index.html";
-};
-
-/* ================= ADMIN FUNCTIONS (UNCHANGED) ================= */
-window.changeUserRole = (id, role) =>
-  setDoc(doc(db,"users",id),{role},{merge:true}).then(()=>location.reload());
-
-window.deleteUser = id =>
-  confirm("Delete user?") &&
-  deleteDoc(doc(db,"users",id)).then(()=>location.reload());
-
-window.addCourse = async () => {
-  await addDoc(collection(db,"courses"), {
-    name: courseName.value,
-    description: courseDesc.value
-  });
-  courseName.value = courseDesc.value = "";
 };
