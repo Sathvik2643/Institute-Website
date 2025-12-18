@@ -121,7 +121,12 @@ window.loginUser = async () => {
     }
 
     const role = snap.data().role;
-    location.href = role === "admin" ? "./admin.html" : "./student.html";
+   if (role === "admin") {
+  window.location.replace("admin.html");
+} else {
+  window.location.replace("student.html");
+}
+
 
   } catch {
     err.textContent = "Invalid email or password.";
