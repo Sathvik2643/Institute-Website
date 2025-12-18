@@ -292,3 +292,37 @@ body {
   border-radius: 6px;
   border: 1px solid #cbd5e1;
 }
+
+/* ADMIN ACCORDION */
+.accordion-item {
+  margin-top: 20px;
+}
+
+.accordion-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  background: #0b5cff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.accordion-content {
+  display: none;
+  margin-top: 10px;
+}
+
+.stat-card.clickable {
+  cursor: pointer;
+}
+
+.btn.danger {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
