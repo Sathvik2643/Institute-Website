@@ -341,3 +341,21 @@ select:focus {
   font-size: 14px;
   margin-top: 40px;
 }
+/* 🌙 MANUAL DARK MODE */
+body.dark {
+  --bg: #020617;
+  --card: #020617;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --border: #1e293b;
+  --shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #e5e7eb;
+}
+
