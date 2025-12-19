@@ -3,7 +3,6 @@ window.showSection = function (id) {
   document.querySelectorAll(".section").forEach(s => {
     s.style.display = "none";
   });
-
   const el = document.getElementById(id);
   if (el) el.style.display = "block";
 };
@@ -12,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("home")) {
     showSection("home");
   }
-
   if (localStorage.getItem("theme") === "dark") {
     document.body.classList.add("dark");
   }
@@ -36,47 +34,16 @@ window.toggleTheme = function () {
   );
 };
 
-/* ================= ADMIN ACCORDION (FIXED) ================= */
+/* ================= ADMIN ACCORDION ================= */
 window.toggleAccordion = function (index) {
-  const sections = document.querySelectorAll(".accordion-content");
-
-  sections.forEach((sec, i) => {
-    if (i === index) {
-      sec.style.display =
-        sec.style.display === "block" ? "none" : "block";
-    } else {
-      sec.style.display = "none";
-    }
+  document.querySelectorAll(".accordion-content").forEach((el, i) => {
+    el.style.display =
+      i === index && el.style.display !== "block" ? "block" : "none";
   });
 };
 
-/* ===== TOGGLE COURSES LIST ===== */
+/* ================= COURSES LIST TOGGLE ================= */
 window.toggleCourses = function () {
   const box = document.getElementById("courseListBox");
   box.style.display = box.style.display === "block" ? "none" : "block";
 };
-
-/* ===== TOGGLE STUDENT SELECT ===== */
-window.toggleStudentSelect = function () {
-  const student = document.getElementById("studentSelect");
-  const course = document.getElementById("courseSelect");
-
-  student.style.display =
-    student.style.display === "block" ? "none" : "block";
-
-  /* close course dropdown if open */
-  if (course) course.style.display = "none";
-};
-
-/* ===== TOGGLE COURSE SELECT ===== */
-window.toggleCourseSelect = function () {
-  const course = document.getElementById("courseSelect");
-  const student = document.getElementById("studentSelect");
-
-  course.style.display =
-    course.style.display === "block" ? "none" : "block";
-
-  /* close student dropdown if open */
-  if (student) student.style.display = "none";
-};
-
