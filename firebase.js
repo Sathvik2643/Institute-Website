@@ -329,6 +329,8 @@ window.assignCourse = async () => {
   /* RESET DROPDOWNS */
   studentSelect.value = "";
   courseSelect.value = "";
+  studentSelect.style.display = "none";
+  courseSelect.style.display = "none";
 };
 
 
