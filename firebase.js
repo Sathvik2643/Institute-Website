@@ -191,18 +191,41 @@ window.assignCourse = async () => {
 
 /* CERTIFICATES */
 window.addCertificate = async () => {
+  const id = certId.value.trim();
+  const email = certEmail.value.trim();
+  const course = certCourse.value.trim();
   let link = certLink.value.trim();
+
+  if (!id || !email || !link) {
+    alert("Fill all required fields");
+    return;
+  }
+
+  /* 🔒 CHECK IF CERTIFICATE ID ALREADY EXISTS */
+  const existing = await getDoc(doc(db, "certificates", id));
+  if (existing.exists()) {
+    alert("Certificate ID already exists. Please use a unique ID.");
+    return;
+  }
+
+  /* CONVERT GOOGLE DRIVE LINK */
   const match = link.match(/\/d\/([^/]+)/);
-  if (match) {
+  if (match && match[1]) {
     link = `https://drive.google.com/uc?export=download&id=${match[1]}`;
   }
 
-  await setDoc(doc(db,"certificates",certId.value),{
-    studentEmail: certEmail.value,
-    course: certCourse.value,
+  await setDoc(doc(db, "certificates", id), {
+    studentEmail: email,
+    course,
     fileUrl: link
   });
 
-  certId.value = certEmail.value = certCourse.value = certLink.value = "";
-  alert("Certificate added");
+  /* RESET FORM */
+  certId.value = "";
+  certEmail.value = "";
+  certCourse.value = "";
+  certLink.value = "";
+
+  alert("Certificate added successfully");
 };
+
