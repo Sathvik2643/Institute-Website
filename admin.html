@@ -13,14 +13,14 @@
     <div class="brand">Admin Dashboard</div>
     <div>
       <button onclick="toggleTheme()">🌙</button>
-      <a onclick="logoutUser()" style="cursor:pointer;color:#fff;margin-left:15px;">Logout</a>
+      <button onclick="logoutUser()">Logout</button>
     </div>
   </nav>
 </header>
 
 <main class="container">
 
-<!-- STATS -->
+<!-- ================= STATS ================= -->
 <div class="admin-stats">
   <div class="stat-card clickable" onclick="toggleUserList('student')">
     <h3 id="totalStudents">0</h3>
@@ -32,39 +32,88 @@
   </div>
 </div>
 
-<!-- STUDENT ID GENERATOR -->
-<div class="card" style="margin-top:20px">
-  <h3>Student ID Generator</h3>
-  <input id="idPrefix" placeholder="Prefix (ex: CT2026)">
-  <input id="idStart" placeholder="Start Number (ex: 001)">
-  <button class="btn" onclick="assignStudentIds()">Assign IDs</button>
-</div>
+<!-- ================= USER MANAGEMENT ================= -->
+<section class="card">
+  <h2>User Management</h2>
 
-<!-- SEARCH -->
-<input id="studentSearch"
-  placeholder="Search by Student ID"
-  oninput="searchStudentsById(this.value)"
-  style="display:none;margin-top:15px;">
+  <div style="margin-bottom:10px">
+    <input id="studentSearch" placeholder="Search by Student ID"
+           oninput="searchStudentsById(this.value)">
+  </div>
 
-<!-- USER LIST -->
-<div id="userListContainer" style="display:none;margin-top:20px;">
   <table class="admin-table">
     <thead>
       <tr>
         <th>Student ID</th>
         <th>Email</th>
         <th>Role</th>
-        <th>Change</th>
+        <th>Change Role</th>
+        <th>View</th>
         <th>Delete</th>
       </tr>
     </thead>
     <tbody id="userTable"></tbody>
   </table>
-</div>
+</section>
+
+<!-- ================= STUDENT ID GENERATOR ================= -->
+<section class="card">
+  <h2>Student ID Generator</h2>
+  <input id="idPrefix" placeholder="Prefix (CT2026)">
+  <input id="idStart" placeholder="Start (001)">
+  <button class="btn" onclick="assignStudentIds()">Assign IDs</button>
+</section>
+
+<!-- ================= COURSE MANAGEMENT ================= -->
+<section class="card">
+  <h2>Course Management</h2>
+
+  <input id="courseId" placeholder="Course ID (PY)">
+  <input id="courseName" placeholder="Course Name">
+  <input id="courseDesc" placeholder="Description">
+  <button class="btn" onclick="addCourse()">Add Course</button>
+
+  <button class="btn" onclick="toggleCourses()">Courses</button>
+
+  <ul id="courseListBox" style="display:none"></ul>
+
+  <hr>
+
+  <h3>Assign Course</h3>
+  <select id="studentSelect"></select>
+  <select id="courseSelect"></select>
+  <button class="btn" onclick="assignCourse()">Assign</button>
+</section>
+
+<!-- ================= CERTIFICATE MANAGEMENT ================= -->
+<section class="card">
+  <h2>Certificate Management</h2>
+
+  <select id="certStudentSelect"></select>
+  <select id="certCourseSelect"></select>
+  <input id="certLink" placeholder="Google Drive Link">
+  <p>Generated Certificate ID: <strong id="generatedCertId">---</strong></p>
+
+  <button class="btn" onclick="addCertificate()">Add Certificate</button>
+</section>
 
 </main>
 
-<footer class="site-footer">© 2025 Code Connect</footer>
+<!-- ================= STUDENT POPUP ================= -->
+<div id="studentOverlay" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#fff;
+  z-index:9999;
+  padding:20px;
+  overflow:auto;
+">
+  <button onclick="closeStudentView()" style="position:absolute;top:10px;right:10px">
+    ✖ Close
+  </button>
+  <div id="studentDashboardContent"></div>
+</div>
 
 <script src="main.js"></script>
 <script type="module" src="firebase.js"></script>
