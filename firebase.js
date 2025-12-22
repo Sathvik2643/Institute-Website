@@ -139,33 +139,42 @@ function renderUsers(users) {
         <td>${u.studentId || "-"}</td>
         <td>${u.email}</td>
         <td>${u.role}</td>
-        <td>
-          <select onchange="changeUserRole('${u.id}',this.value)">
-            <option value="student" ${u.role==="student"?"selected":""}>Student</option>
-            <option value="admin" ${u.role==="admin"?"selected":""}>Admin</option>
-          </select>
-        </td>
-        <td>
-          <button onclick="deleteUser('${u.id}')">Delete</button>
-        </td>
+       <td>
+       <select class="btn" onchange="changeUserRole('${u.id}',this.value)">
+       <option value="student" ${u.role==="student"?"selected":""}>Student</option>
+       <option value="admin" ${u.role==="admin"?"selected":""}>Admin</option>
+       </select>
+       </td>
+       <td>
+       <button class="btn" onclick="viewStudent('${u.studentId || ""}')">View</button>
+       </td>
+       <td>
+       <button class="btn danger" onclick="deleteUser('${u.id}')">Delete</button>
+       </td>
+
       </tr>`;
   });
 }
 
 /* Toggle student/admin tabs */
 window.toggleUserList = role => {
+  const container = document.getElementById("userListContainer");
+  const search = document.getElementById("studentSearch");
+
   if (currentUserTab === role) {
-    userListContainer.style.display = "none";
-    studentSearch.style.display = "none";
+    container.style.display = "none";
+    search.style.display = "none";
     currentUserTab = null;
     return;
   }
 
   currentUserTab = role;
-  userListContainer.style.display = "block";
-  studentSearch.style.display = role === "student" ? "block" : "none";
+  container.style.display = "block";
+  search.style.display = role === "student" ? "block" : "none";
+
   renderUsers(allUsers.filter(u => u.role === role));
 };
+
 
 window.searchStudentsById = txt => {
   renderUsers(
