@@ -33,108 +33,25 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* ================= DOM (LOGIN PAGE) ================= */
-const form = document.getElementById("loginForm");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-const errorMsg = document.getElementById("errorMsg");
-const registerBtn = document.getElementById("registerUser");
-const forgotBtn = document.getElementById("forgotPassword");
-
-/* ================= LOGIN ================= */
-form?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  errorMsg.textContent = "";
-
-  try {
-    const cred = await signInWithEmailAndPassword(
-      auth,
-      emailInput.value,
-      passwordInput.value
-    );
-
-    if (!cred.user.emailVerified) {
-      errorMsg.textContent = "Please verify your email before login.";
-      return;
-    }
-
-    // 🔑 Redirect decision handled by onAuthStateChanged
-    // Just wait for auth state
-  } catch (err) {
-    errorMsg.textContent = "Invalid email or password.";
-  }
-});
-
-/* ================= REGISTER ================= */
-registerBtn?.addEventListener("click", async () => {
-  errorMsg.textContent = "";
-
-  if (passwordInput.value.length < 6) {
-    errorMsg.textContent = "Password must be at least 6 characters.";
-    return;
-  }
-
-  try {
-    const cred = await createUserWithEmailAndPassword(
-      auth,
-      emailInput.value,
-      passwordInput.value
-    );
-
-    await setDoc(doc(db, "users", cred.user.uid), {
-      email: emailInput.value,
-      role: "student",
-      courses: []
-    });
-
-    await sendEmailVerification(cred.user);
-    errorMsg.textContent =
-      "Registration successful. Verification email sent.";
-
-  } catch {
-    errorMsg.textContent = "Registration failed.";
-  }
-});
-
-/* ================= FORGOT PASSWORD ================= */
-forgotBtn?.addEventListener("click", async () => {
-  if (!emailInput.value) {
-    errorMsg.textContent = "Enter your email to reset password.";
-    return;
-  }
-
-  try {
-    await sendPasswordResetEmail(auth, emailInput.value);
-    errorMsg.textContent = "Password reset email sent.";
-  } catch {
-    errorMsg.textContent = "Failed to send reset email.";
-  }
-});
-
 /* ================= LOGOUT ================= */
 window.logoutUser = async () => {
   await signOut(auth);
   location.href = "login.html";
 };
 
-/* ================= GLOBAL STATE ================= */
+/* ================= GLOBAL ================= */
 let allUsers = [];
+let allCourses = [];
 
-/* ================= AUTH ROUTER (SINGLE SOURCE OF TRUTH) ================= */
+/* ================= AUTH ROUTER ================= */
 onAuthStateChanged(auth, async (user) => {
-
-  /* NOT LOGGED IN */
   if (!user) {
-    if (
-      location.pathname.includes("admin") ||
-      location.pathname.includes("student")
-    ) {
+    if (location.pathname.includes("admin") || location.pathname.includes("student")) {
       location.href = "login.html";
     }
     return;
   }
 
-  /* FETCH USER ROLE */
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) {
     location.href = "login.html";
@@ -143,74 +60,48 @@ onAuthStateChanged(auth, async (user) => {
 
   const role = snap.data().role;
 
-  /* LOGIN PAGE → DASHBOARD */
   if (location.pathname.includes("login")) {
     location.href = role === "admin" ? "admin.html" : "student.html";
     return;
   }
 
-  /* ADMIN PAGE PROTECTION */
   if (location.pathname.includes("admin") && role !== "admin") {
     location.href = "student.html";
     return;
   }
 
-  /* STUDENT PAGE PROTECTION */
-  if (location.pathname.includes("student") && role !== "student") {
-    location.href = "admin.html";
-    return;
-  }
-
-  /* ================= ADMIN PAGE INIT ================= */
   if (location.pathname.includes("admin")) {
-
-    const usersSnap = await getDocs(collection(db, "users"));
-    allUsers = [];
-
-    let students = 0;
-    let admins = 0;
-
-    usersSnap.forEach(d => {
-      const u = d.data();
-      allUsers.push({ id: d.id, ...u });
-      if (u.role === "student") students++;
-      if (u.role === "admin") admins++;
-    });
-
-    totalStudents.innerText = students;
-    totalAdmins.innerText = admins;
-
+    loadUsers();
     loadCourses();
-    loadStudents();
-    loadCertStudents();
+    loadStudentsForAssign();
+    loadCertSelectors();
   }
 });
 
 /* ================= USER MANAGEMENT ================= */
-window.toggleUserList = role => {
-  const box = document.getElementById("userListContainer");
-  const search = document.getElementById("studentSearch");
+async function loadUsers() {
+  const snap = await getDocs(collection(db, "users"));
+  allUsers = [];
+  let students = 0, admins = 0;
 
-  box.style.display = "block";
-  search.style.display = role === "student" ? "block" : "none";
+  snap.forEach(d => {
+    const u = d.data();
+    allUsers.push({ id: d.id, ...u });
+    if (u.role === "student") students++;
+    if (u.role === "admin") admins++;
+  });
 
-  renderUsers(allUsers.filter(u => u.role === role));
-};
-
-window.searchStudents = txt => {
-  renderUsers(
-    allUsers.filter(
-      u => u.role === "student" &&
-      u.email.toLowerCase().includes(txt.toLowerCase())
-    )
-  );
-};
+  totalStudents.innerText = students;
+  totalAdmins.innerText = admins;
+  renderUsers(allUsers);
+}
 
 function renderUsers(users) {
   userTable.innerHTML = "";
   users.forEach(u => {
     userTable.innerHTML += `
       <tr>
+        <td>${u.studentId || "-"}</td>
         <td>${u.email}</td>
         <td>${u.role}</td>
         <td>
@@ -220,31 +111,92 @@ function renderUsers(users) {
           </select>
         </td>
         <td>
+          <button class="btn" onclick="viewStudent('${u.studentId || ""}')">View</button>
+        </td>
+        <td>
           <button class="btn danger" onclick="deleteUser('${u.id}')">Delete</button>
         </td>
       </tr>`;
   });
 }
 
+window.searchStudentsById = txt => {
+  renderUsers(
+    allUsers.filter(
+      u =>
+        u.role === "student" &&
+        u.studentId &&
+        u.studentId.toLowerCase().includes(txt.toLowerCase())
+    )
+  );
+};
+
 window.changeUserRole = async (id, role) => {
-  await setDoc(doc(db,"users",id),{role},{merge:true});
-  location.reload();
+  await setDoc(doc(db, "users", id), { role }, { merge: true });
+  loadUsers();
 };
 
 window.deleteUser = async id => {
   if (!confirm("Delete user?")) return;
-  await deleteDoc(doc(db,"users",id));
-  location.reload();
+  await deleteDoc(doc(db, "users", id));
+  loadUsers();
 };
 
-/* ================= COURSES ================= */
-window.addCourse = async () => {
-  if (!courseId.value || !courseName.value) {
-    alert("Course ID & Name required");
+/* ================= STUDENT ID GENERATOR ================= */
+window.assignStudentIds = async () => {
+  const prefix = idPrefix.value.trim();
+  let start = parseInt(idStart.value, 10);
+
+  if (!prefix || isNaN(start)) {
+    alert("Enter valid prefix and start number");
     return;
   }
 
-  await addDoc(collection(db,"courses"),{
+  for (const u of allUsers) {
+    if (u.role === "student" && !u.studentId) {
+      const sid = `${prefix}-${String(start).padStart(3, "0")}`;
+      await setDoc(doc(db, "users", u.id), { studentId: sid }, { merge: true });
+      start++;
+    }
+  }
+
+  alert("Student IDs assigned");
+  loadUsers();
+};
+
+/* ================= STUDENT POPUP ================= */
+window.viewStudent = studentId => {
+  if (!studentId) {
+    alert("Student ID not assigned");
+    return;
+  }
+
+  const student = allUsers.find(u => u.studentId === studentId);
+  if (!student) return;
+
+  studentDashboardContent.innerHTML = `
+    <h2>Student Dashboard</h2>
+    <p><strong>ID:</strong> ${student.studentId}</p>
+    <p><strong>Email:</strong> ${student.email}</p>
+    <h3>Courses</h3>
+    <ul>${(student.courses || []).map(c => `<li>${c}</li>`).join("")}</ul>
+  `;
+
+  studentOverlay.style.display = "block";
+};
+
+window.closeStudentView = () => {
+  studentOverlay.style.display = "none";
+};
+
+/* ================= COURSE MANAGEMENT ================= */
+window.addCourse = async () => {
+  if (!courseId.value || !courseName.value) {
+    alert("Course ID & name required");
+    return;
+  }
+
+  await addDoc(collection(db, "courses"), {
     courseId: courseId.value.toUpperCase(),
     name: courseName.value,
     description: courseDesc.value
@@ -254,71 +206,79 @@ window.addCourse = async () => {
   loadCourses();
 };
 
-window.editCourse = async (docId, cid, name, desc) => {
-  const nCid = prompt("Edit Course ID", cid);
-  const nName = prompt("Edit Course Name", name);
-  const nDesc = prompt("Edit Description", desc);
-  if (!nCid || !nName) return;
-
-  await setDoc(doc(db,"courses",docId),{
-    courseId: nCid.toUpperCase(),
-    name: nName,
-    description: nDesc
-  },{merge:true});
-
-  loadCourses();
-};
-
 async function loadCourses() {
-  courseList.innerHTML = "";
+  const snap = await getDocs(collection(db, "courses"));
+  allCourses = [];
+  courseListBox.innerHTML = "";
   courseSelect.innerHTML = `<option value="">Select Course</option>`;
+  certCourseSelect.innerHTML = `<option value="">Select Course</option>`;
 
-  const snap = await getDocs(collection(db,"courses"));
   snap.forEach(d => {
     const c = d.data();
-    courseList.innerHTML += `
+    allCourses.push({ id: d.id, ...c });
+
+    courseListBox.innerHTML += `
       <li>
         <strong>${c.courseId}</strong> - ${c.name}<br>
         <small>${c.description}</small><br>
         <button class="btn" onclick="editCourse('${d.id}','${c.courseId}','${c.name}','${c.description}')">Edit</button>
         <button class="btn danger" onclick="deleteCourse('${d.id}')">Delete</button>
       </li>`;
-    courseSelect.innerHTML += `<option value="${c.courseId}">${c.courseId}</option>`;
-  });
 
-  loadCertCourses();
+    courseSelect.innerHTML += `<option value="${c.courseId}">${c.courseId}</option>`;
+    certCourseSelect.innerHTML += `<option value="${c.courseId}">${c.courseId}</option>`;
+  });
 }
+
+window.toggleCourses = () => {
+  courseListBox.style.display =
+    courseListBox.style.display === "block" ? "none" : "block";
+};
+
+window.editCourse = async (id, cid, name, desc) => {
+  const nCid = prompt("Course ID", cid);
+  const nName = prompt("Course Name", name);
+  const nDesc = prompt("Description", desc);
+  if (!nCid || !nName) return;
+
+  await setDoc(doc(db, "courses", id), {
+    courseId: nCid.toUpperCase(),
+    name: nName,
+    description: nDesc
+  }, { merge: true });
+
+  loadCourses();
+};
 
 window.deleteCourse = async id => {
   if (!confirm("Delete course?")) return;
-  await deleteDoc(doc(db,"courses",id));
+  await deleteDoc(doc(db, "courses", id));
   loadCourses();
 };
 
 /* ================= ASSIGN COURSE ================= */
-async function loadStudents() {
+async function loadStudentsForAssign() {
   studentSelect.innerHTML = `<option value="">Select Student</option>`;
-  const snap = await getDocs(collection(db,"users"));
-  snap.forEach(d => {
-    if (d.data().role === "student") {
-      studentSelect.innerHTML += `<option value="${d.id}">${d.data().email}</option>`;
+  allUsers.forEach(u => {
+    if (u.role === "student") {
+      studentSelect.innerHTML += `<option value="${u.id}">${u.studentId || u.email}</option>`;
     }
   });
 }
 
 window.assignCourse = async () => {
   if (!studentSelect.value || !courseSelect.value) {
-    alert("Select student & course");
+    alert("Select student and course");
     return;
   }
 
-  const ref = doc(db,"users",studentSelect.value);
+  const ref = doc(db, "users", studentSelect.value);
   const snap = await getDoc(ref);
   const courses = snap.data().courses || [];
 
   if (!courses.includes(courseSelect.value)) {
     courses.push(courseSelect.value);
-    await setDoc(ref,{courses},{merge:true});
+    await setDoc(ref, { courses }, { merge: true });
     alert("Course assigned");
   }
 
@@ -326,41 +286,15 @@ window.assignCourse = async () => {
   courseSelect.value = "";
 };
 
-/* ================= CERTIFICATES ================= */
-let certStudents = [];
-let certCourses = [];
-
-async function loadCertStudents() {
-  certStudents = [];
-  const snap = await getDocs(collection(db,"users"));
-  snap.forEach(d => {
-    if (d.data().studentId) certStudents.push(d.data().studentId);
+/* ================= CERTIFICATE MANAGEMENT ================= */
+async function loadCertSelectors() {
+  certStudentSelect.innerHTML = `<option value="">Select Student</option>`;
+  allUsers.forEach(u => {
+    if (u.role === "student" && u.studentId) {
+      certStudentSelect.innerHTML += `<option value="${u.studentId}">${u.studentId}</option>`;
+    }
   });
-  renderCertStudents(certStudents);
 }
-
-async function loadCertCourses() {
-  certCourses = [];
-  const snap = await getDocs(collection(db,"courses"));
-  snap.forEach(d => certCourses.push(d.data().courseId));
-  renderCertCourses(certCourses);
-}
-
-function renderCertStudents(list) {
-  certStudentSelect.innerHTML = "";
-  list.forEach(id => certStudentSelect.innerHTML += `<option>${id}</option>`);
-}
-
-function renderCertCourses(list) {
-  certCourseSelect.innerHTML = "";
-  list.forEach(id => certCourseSelect.innerHTML += `<option>${id}</option>`);
-}
-
-window.filterStudents = txt =>
-  renderCertStudents(certStudents.filter(s => s.includes(txt)));
-
-window.filterCourses = txt =>
-  renderCertCourses(certCourses.filter(c => c.includes(txt)));
 
 certStudentSelect.onchange = certCourseSelect.onchange = () => {
   if (certStudentSelect.value && certCourseSelect.value) {
@@ -371,12 +305,12 @@ certStudentSelect.onchange = certCourseSelect.onchange = () => {
 
 window.addCertificate = async () => {
   if (!certStudentSelect.value || !certCourseSelect.value || !certLink.value) {
-    alert("Select student, course and add link");
+    alert("All fields required");
     return;
   }
 
   const certId = `${certStudentSelect.value}-${certCourseSelect.value}`;
-  const exists = await getDoc(doc(db,"certificates",certId));
+  const exists = await getDoc(doc(db, "certificates", certId));
   if (exists.exists()) {
     alert("Certificate already exists");
     return;
@@ -384,9 +318,11 @@ window.addCertificate = async () => {
 
   let link = certLink.value;
   const m = link.match(/\/d\/([^/]+)/);
-  if (m) link = `https://drive.google.com/uc?export=download&id=${m[1]}`;
+  if (m) {
+    link = `https://drive.google.com/uc?export=download&id=${m[1]}`;
+  }
 
-  await setDoc(doc(db,"certificates",certId),{
+  await setDoc(doc(db, "certificates", certId), {
     studentId: certStudentSelect.value,
     courseId: certCourseSelect.value,
     fileUrl: link
