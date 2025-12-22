@@ -16,6 +16,22 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+/* LOGIN */
+onAuthStateChanged(auth, async user => {
+  if (!user && location.pathname.includes("admin")) {
+    location.href = "login.html";
+    return;
+  }
+
+  if (user && location.pathname.includes("admin")) {
+    const snap = await getDoc(doc(db,"users",user.uid));
+    if (!snap.exists() || snap.data().role !== "admin") {
+      location.href = "student.html";
+    }
+  }
+});
+
+
 /* LOGOUT */
 window.logoutUser = async () => {
   await signOut(auth);
