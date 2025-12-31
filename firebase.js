@@ -157,27 +157,98 @@ function renderUsers(users) {
   });
 }
 
+async function resolveCourseNames(courseIds = []) {
+  const snap = await getDocs(collection(db, "courses"));
+  const map = {};
+
+  snap.forEach(d => {
+    const c = d.data();
+    map[c.courseId] = `${c.courseId} - ${c.name}`;
+  });
+
+  return courseIds.map(id => map[id] || id);
+}
+
+
 window.viewStudent = async (userId) => {
   const overlay = document.getElementById("studentOverlay");
   const content = document.getElementById("studentDashboardContent");
 
-  const snap = await getDoc(doc(db, "users", userId));
-  if (!snap.exists()) return alert("Student not found");
+  const userSnap = await getDoc(doc(db, "users", userId));
+  if (!userSnap.exists()) return alert("Student not found");
 
-  const u = snap.data();
+  const user = userSnap.data();
+
+  // Resolve course names
+  const resolvedCourses = await resolveCourseNames(user.courses || []);
+
+  // Fetch certificates
+  const certSnap = await getDocs(collection(db, "certificates"));
+  const certs = [];
+  certSnap.forEach(d => {
+    const c = d.data();
+    if (c.studentId === user.studentId) {
+      certs.push(c);
+    }
+  });
 
   overlay.style.display = "block";
 
   content.innerHTML = `
-    <h2>Student Dashboard</h2>
-    <p><strong>Student ID:</strong> ${u.studentId || "-"}</p>
-    <p><strong>Email:</strong> ${u.email}</p>
+    <div class="popup-card">
+      <h2>Student Dashboard</h2>
 
-    <h3>Enrolled Courses</h3>
-    <ul>
-      ${(u.courses || []).map(c => `<li>${c}</li>`).join("") || "<li>None</li>"}
-    </ul>
+      <div class="popup-section">
+        <p><strong>Student ID:</strong> ${user.studentId || "-"}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+      </div>
+
+      <div class="popup-section">
+        <h3>Enrolled Courses</h3>
+        <ul>
+          ${
+            resolvedCourses.length
+              ? resolvedCourses.map(c => `<li>${c}</li>`).join("")
+              : "<li>No courses assigned</li>"
+          }
+        </ul>
+      </div>
+
+      <div class="popup-section">
+        <h3>Certificates</h3>
+        ${
+          certs.length
+            ? certs.map(c => `
+                <div class="cert-row">
+                  <span>${c.courseId}</span>
+                  <a class="btn" href="${c.fileUrl}" target="_blank">Download</a>
+                </div>
+              `).join("")
+            : "<p>No certificates issued</p>"
+        }
+      </div>
+
+      <div class="popup-section">
+        <h3>Edit Student</h3>
+        <input id="editStudentEmail" value="${user.email}">
+        <button class="btn" onclick="saveStudentEdit('${userId}')">Save</button>
+      </div>
+    </div>
   `;
+};
+
+window.saveStudentEdit = async (userId) => {
+  const email = document.getElementById("editStudentEmail").value.trim();
+  if (!email) return alert("Email required");
+
+  await setDoc(
+    doc(db, "users", userId),
+    { email },
+    { merge: true }
+  );
+
+  alert("Student updated");
+  loadUsers();
 };
 
 window.closeStudentView = () => {
