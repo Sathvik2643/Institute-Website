@@ -32,13 +32,16 @@
   </div>
 </div>
 
-<!-- ================= USER MANAGEMENT ================= -->
-<section class="card">
+<!-- ================= USER MANAGEMENT (HIDDEN BY DEFAULT) ================= -->
+<section class="card" id="userListContainer" style="display:none">
   <h2>User Management</h2>
 
+  <!-- Search (only for students) -->
   <div style="margin-bottom:10px">
-    <input id="studentSearch" placeholder="Search by Student ID"
-           oninput="searchStudentsById(this.value)">
+    <input id="studentSearch"
+           placeholder="Search by Student ID"
+           oninput="searchStudentsById(this.value)"
+           style="display:none">
   </div>
 
   <table class="admin-table">
@@ -109,13 +112,15 @@
   padding:20px;
   overflow:auto;
 ">
-  <button onclick="closeStudentView()" style="position:absolute;top:10px;right:10px">
+  <button onclick="closeStudentView()"
+          style="position:absolute;top:10px;right:10px">
     ✖ Close
   </button>
   <div id="studentDashboardContent"></div>
 </div>
 
-  <footer class="site-footer">© 2025 Code Connect</footer>
+<footer class="site-footer">© 2025 Code Connect</footer>
+
 <script src="main.js"></script>
 <script type="module" src="firebase.js"></script>
 </body>
