@@ -163,12 +163,16 @@ async function resolveCourseNames(courseIds = []) {
 
   snap.forEach(d => {
     const c = d.data();
+
+    // Map by courseId (PY, JS, etc.)
     map[c.courseId] = `${c.courseId} - ${c.name}`;
+
+    // Map by Firestore document ID (old data support)
+    map[d.id] = `${c.courseId} - ${c.name}`;
   });
 
   return courseIds.map(id => map[id] || id);
 }
-
 
 window.viewStudent = async (userId) => {
   const overlay = document.getElementById("studentOverlay");
