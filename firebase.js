@@ -133,28 +133,57 @@ async function loadUsers() {
 
 function renderUsers(users) {
   userTable.innerHTML = "";
+
   users.forEach(u => {
+
+    // View button ONLY for students
+    const viewBtn = u.role === "student"
+      ? `<button class="btn" onclick="viewStudent('${u.id}')">View</button>`
+      : "";
+
     userTable.innerHTML += `
       <tr>
         <td>${u.studentId || "-"}</td>
         <td>${u.email}</td>
         <td>${u.role}</td>
-       <td>
-       <select class="btn" onchange="changeUserRole('${u.id}',this.value)">
-       <option value="student" ${u.role==="student"?"selected":""}>Student</option>
-       <option value="admin" ${u.role==="admin"?"selected":""}>Admin</option>
-       </select>
-       </td>
-       <td>
-       <button class="btn" onclick="viewStudent('${u.studentId || ""}')">View</button>
-       </td>
-       <td>
-       <button class="btn danger" onclick="deleteUser('${u.id}')">Delete</button>
-       </td>
-
-      </tr>`;
+        <td>${viewBtn}</td>
+        <td>
+          <button class="btn danger" onclick="deleteUser('${u.id}')">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `;
   });
 }
+
+window.viewStudent = async (userId) => {
+  const overlay = document.getElementById("studentOverlay");
+  const content = document.getElementById("studentDashboardContent");
+
+  const snap = await getDoc(doc(db, "users", userId));
+  if (!snap.exists()) return alert("Student not found");
+
+  const u = snap.data();
+
+  overlay.style.display = "block";
+
+  content.innerHTML = `
+    <h2>Student Dashboard</h2>
+    <p><strong>Student ID:</strong> ${u.studentId || "-"}</p>
+    <p><strong>Email:</strong> ${u.email}</p>
+
+    <h3>Enrolled Courses</h3>
+    <ul>
+      ${(u.courses || []).map(c => `<li>${c}</li>`).join("") || "<li>None</li>"}
+    </ul>
+  `;
+};
+
+window.closeStudentView = () => {
+  document.getElementById("studentOverlay").style.display = "none";
+};
+
 
 /* Toggle student/admin tabs */
 window.toggleUserList = role => {
