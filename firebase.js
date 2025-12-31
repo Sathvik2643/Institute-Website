@@ -161,6 +161,9 @@ window.toggleUserList = role => {
   const container = document.getElementById("userListContainer");
   const search = document.getElementById("studentSearch");
 
+  if (!container || !search) return;
+
+  // If same tab clicked again → close
   if (currentUserTab === role) {
     container.style.display = "none";
     search.style.display = "none";
@@ -168,11 +171,17 @@ window.toggleUserList = role => {
     return;
   }
 
+  // Open user management
   currentUserTab = role;
   container.style.display = "block";
-  search.style.display = role === "student" ? "block" : "none";
 
-  renderUsers(allUsers.filter(u => u.role === role));
+  if (role === "student") {
+    search.style.display = "block";
+    renderUsers(allUsers.filter(u => u.role === "student"));
+  } else {
+    search.style.display = "none";
+    renderUsers(allUsers.filter(u => u.role === "admin"));
+  }
 };
 
 
@@ -342,3 +351,12 @@ window.addCertificate = async () => {
   generatedCertId.innerText = "---";
   alert("Certificate added");
 };
+
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("userListContainer");
+  const search = document.getElementById("studentSearch");
+
+  if (container) container.style.display = "none";
+  if (search) search.style.display = "none";
+});
+
